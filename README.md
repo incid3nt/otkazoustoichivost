@@ -264,6 +264,39 @@ nginx2                     : ok=3    changed=2    unreachable=0    failed=0    s
 
 ![balancer](https://github.com/incid3nt/otkazoustoichivost/blob/main/image/chrome_KS07YHp7XX.png)`
 
+и видим что балансировщик работает:
+```
+oleg@DESKTOP-6TMQOI1:~/otkazoust$ curl http://158.160.154.224/
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to wm0</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to wm0!</h1>
+</body>
+</html>
+oleg@DESKTOP-6TMQOI1:~/otkazoust$ curl http://158.160.154.224/
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to wm1</h1>
+</body>
+</html>
+```
 ---
 
 ### Задание 2
