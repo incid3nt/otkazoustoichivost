@@ -262,6 +262,7 @@ nginx1                     : ok=3    changed=2    unreachable=0    failed=0    s
 nginx2                     : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
 ```
 
+![balancer](https://github.com/incid3nt/otkazoustoichivost/blob/main/image/chrome_KS07YHp7XX.png)`
 
 ---
 
