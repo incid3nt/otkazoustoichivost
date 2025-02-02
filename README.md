@@ -48,12 +48,190 @@
 
 3. Скриншот страницы, которая открылась при запросе IP-адреса балансировщика.
 
+Terraform playbook
 ```
-Поле для вставки кода...
-....
-....
-....
-....
+resource "yandex_vpc_network" "net" {
+  name = "sminex"
+}
+
+resource "yandex_vpc_subnet" "subnet1" {
+  name           = "sminex"
+  zone           = "ru-central1-a"
+  network_id     = yandex_vpc_network.net.id
+  v4_cidr_blocks = ["192.168.0.0/24"]
+}
+
+/*resource "yandex_vpc_subnet" "subnet2" {
+  name           = "sminex2"
+  zone           = "ru-central1-b"
+  network_id     = yandex_vpc_network.net.id
+  v4_cidr_blocks = ["10.0.0.0/24"]
+}
+
+
+/*resource "yandex_compute_instance" "devops" {
+  name        = "devops"
+  hostname    = "devops"
+  platform_id = "standard-v1"
+  zone        = "ru-central1-a"
+
+  resources {
+    cores  = 2
+    memory = 1
+    core_fraction = 20
+  }
+
+  boot_disk {
+    initialize_params {
+      image_id = "fd8hr27j6bkf6bd0tdsh"
+      size = 15
+      type = "network-hdd"
+    }
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.subnet1.id
+    ip_address = "192.168.0.4"
+    nat = true
+  }
+
+  metadata = {
+    user-data          = file("./cloud-init.yml")
+    serial-port-enable = 1
+  }
+
+  timeouts {
+    create = "10m"
+  }
+}
+
+
+resource "yandex_compute_instance" "devops2" {
+  name        = "vpn"
+  hostname    = "vpn"
+  platform_id = "standard-v1"
+  zone        = "ru-central1-b"
+
+  resources {
+    cores  = 2
+    memory = 1
+    core_fraction = 20
+  }
+
+  boot_disk {
+    initialize_params {
+      image_id = "fd8hr27j6bkf6bd0tdsh"
+      size = 15
+      type = "network-hdd"
+    }
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.subnet2.id
+    ip_address = "10.0.0.27"
+    nat = true
+  }
+
+  metadata = {
+    user-data          = file("./cloud-init.yml")
+    serial-port-enable = 1
+  }
+
+  timeouts {
+    create = "10m"
+  }
+}
+
+output "public_ip_devops" {
+  value = yandex_compute_instance.devops.network_interface.0.nat_ip_address
+}
+
+output "public_ip_devops2" {
+  value = yandex_compute_instance.devops2.network_interface.0.nat_ip_address
+}
+*/
+
+resource "yandex_lb_network_load_balancer" "balancer" {
+  name = "balancer"
+
+  listener {
+    name = "balancer"
+    port = 80
+    external_address_spec {
+      ip_version = "ipv4"
+    }
+  }
+
+  attached_target_group {
+    target_group_id = yandex_lb_target_group.group1.id
+
+    healthcheck {
+      name = "http"
+      http_options {
+        port = 80
+        path = "/"
+      }
+    }
+  }
+}
+resource "yandex_lb_target_group" "group1" {
+  name      = "group1"
+  region_id = "ru-central1"
+
+  target {
+    subnet_id = yandex_vpc_subnet.subnet1.id
+    address   = "192.168.0.10"  // Убедитесь, что этот IP находится в диапазоне вашей подсети
+  }
+
+  target {
+    subnet_id = yandex_vpc_subnet.subnet1.id
+    address   = "192.168.0.11"  // Убедитесь, что этот IP находится в диапазоне вашей подсети
+  }
+}
+
+# Создание двух виртуальных машин
+resource "yandex_compute_instance" "vm" {
+  count = 2
+  name        = "vm-${count.index}"
+  hostname    = "vm-${count.index}"
+  platform_id = "standard-v1"
+  zone        = "ru-central1-a"
+  
+  boot_disk {
+    initialize_params {
+      image_id = "fd8gb53770b38drt7f1h" // debian 12
+      size = 8
+      type = "network-hdd"
+    }
+  }
+
+  resources {
+    cores  = 2
+    memory = 1
+    core_fraction = 20
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.subnet1.id
+    ip_address = "192.168.0.${10 + count.index}"  # Уникальные IP-адреса
+    nat = true
+  }
+
+  metadata = {
+    user-data          = file("./cloud-init.yml")
+    soft-data          = file("./meta-data.yml")
+    serial-port-enable = 1
+  }
+}
+output "vm-nat_ip_address" {
+  value = yandex_compute_instance.vm[0].network_interface.0.nat_ip_address
+}
+
+output "vm-nat_ip_address2" {
+  value = yandex_compute_instance.vm[1].network_interface.0.nat_ip_address
+}
+
+
 ```
 
 `При необходимости прикрепитe сюда скриншоты
