@@ -219,7 +219,6 @@ resource "yandex_compute_instance" "vm" {
 
   metadata = {
     user-data          = file("./cloud-init.yml")
-    soft-data          = file("./meta-data.yml")
     serial-port-enable = 1
   }
 }
